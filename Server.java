@@ -341,7 +341,7 @@ public class Server extends Thread {
    
      public double deposit(int i, double amount)
      {  double curBalance;      /* Current account balance */
-       synchronized(this)
+       synchronized(account[i])
        {
      		curBalance = account[i].getBalance( );          /* Get current account balance */
         
@@ -373,7 +373,7 @@ public class Server extends Thread {
      public double withdraw(int i, double amount)
      {  double curBalance;      /* Current account balance */
         
-     synchronized(this) {
+     synchronized(account[i]) {
      	curBalance = account[i].getBalance( );          /* Get current account balance */
           
         System.out.println("\n DEBUG : Server.withdraw - " + "i " + i + " Current balance " + curBalance + " Amount " + amount + " " + getServerThreadId());
@@ -393,7 +393,7 @@ public class Server extends Thread {
  
      public double query(int i)
      {  double curBalance;      /* Current account balance */
-        synchronized(this)
+        synchronized(account[i])
         {
      	curBalance = account[i].getBalance( );          /* Get current account balance */
         

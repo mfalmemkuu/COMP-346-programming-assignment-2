@@ -262,8 +262,9 @@ public class Server extends Thread {
      * 
      * @return 
      * @param trans
+     * @throws InterruptedException 
      */
-     public boolean processTransactions(Transactions trans)
+     public boolean processTransactions(Transactions trans) throws InterruptedException
      {   int accIndex;             	/* Index position of account to update */
          double newBalance; 		/* Updated account balance */
          
@@ -272,10 +273,10 @@ public class Server extends Thread {
          /* Process the accounts until the client disconnects */
          while ((!Network.getClientConnectionStatus().equals("disconnected")))
          {
-        	while ( (Network.getInBufferStatus().equals("empty") && !Network.getClientConnectionStatus().equals("disconnected")) ) 
-        	 { 
-        		 Thread.yield(); 	/* Yield the cpu if the network input buffer is empty */
-        	 }
+        	//while ( (Network.getInBufferStatus().equals("empty") && !Network.getClientConnectionStatus().equals("disconnected")) ) 
+        	// { 
+        		// Thread.yield(); 	/* Yield the cpu if the network input buffer is empty */
+        	// }
         	 
         	 if (!Network.getInBufferStatus().equals("empty"))
         	 { 
@@ -315,10 +316,10 @@ public class Server extends Thread {
 					} 
 
             	
-        		 while (Network.getOutBufferStatus().equals("full")) 
-        		 { 
-        			 Thread.yield();		/* Yield the cpu if the network output buffer is full */
-        		 }
+        		 //while (Network.getOutBufferStatus().equals("full")) 
+        		 //{ 
+        			 //Thread.yield();		/* Yield the cpu if the network output buffer is full */
+        		 //}
         		
         		 /* System.out.println("\n DEBUG : Server.processTransactions() - transferring out account " + trans.getAccountNumber()); */
         		 
@@ -427,8 +428,13 @@ public class Server extends Thread {
     	
     	 if (getServerThreadId().equals("Thread1")) {
     		 System.out.println("\n DEBUG : Server.run() - starting server thread " + getServerThreadId() + " " + Network.getServerConnectionStatus());
+    		 try {
+    			 
     		 processTransactions(trans);
-    		 
+    		 }
+    		 catch(InterruptedException e) {
+    			 
+    		 }
     			 setServerThreadRunningStatus1("terminated");
     			 System.out.println("\nServer thread 1 terminated\n");
     		 
@@ -440,17 +446,24 @@ public class Server extends Thread {
     	
     	 if (getServerThreadId().equals("Thread2")) {
     		 System.out.println("\n DEBUG : Server.run() - starting server thread " + getServerThreadId() + " " + Network.getServerConnectionStatus());
+    		 try {
+     			
     		 processTransactions(trans);
-    		while(!getServerThreadRunningStatus1().equals("terminated")) {
-    			Thread.yield();
-    		}
+    		 }
+    		 catch(InterruptedException e) {
+    			 
+    		 }
     		setServerThreadRunningStatus2("terminated");
-			 System.out.println("\nServer thread 2 terminated\n");
-			 System.out.println("\nServer disconnected\n");
-			 Network.disconnect(Network.getServerIP());
+    		System.out.println("Server thread 2 terminated");
 			 
+			  }
+    	 while(!getServerThreadRunningStatus1().equals("terminated") || !getServerThreadRunningStatus2().equals("terminated") ) {
+	 			Thread.yield();
+	 		}
+    	 if((!Network.getServerConnectionStatus().equals("disconnected"))) {
+    	 System.out.println("\nServer disconnected\n");
+		 Network.disconnect(Network.getServerIP());
     	 }
-    	 
 	/* System.out.println("\n DEBUG : Server.run() - starting server thread " + objNetwork.getServerConnectionStatus()); */
     	
     	/* .....................................................................................................................................................................................................*/
